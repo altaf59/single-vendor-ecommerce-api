@@ -10,3 +10,7 @@ class userCreat(BaseModel):
     username:str
     email:str
     password:str
+    
+class orderCreate(BaseModel):
+    product_id:int
+    quantity:int
