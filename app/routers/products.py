@@ -10,3 +10,7 @@ router = APIRouter(prefix="/products",tags=["products"])
 @router.post("/", response_model=schemas.productBase)
 def create_product(product:schemas.productBase, db:Session = Depends(get_db)):
     return crud.create_products(db, product)
+
+@router.get("/", response_model=list[schemas.productBase])
+def read_products(db:Session = Depends(get_db)):
+    return crud.read_products(db)
