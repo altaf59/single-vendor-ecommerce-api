@@ -1,5 +1,4 @@
-"""(Database tables ke liye)"""
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float
 from .database import Base
 
 class User(Base):
@@ -15,7 +14,7 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     description = Column(String)
-    price = Column(Integer)
+    price = Column(Float)
     stock = Column(Integer)
 
 class Order(Base):
@@ -24,8 +23,8 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
     quantity = Column(Integer)
-    status = Column(String)
-    total_price = Column(Integer)
+    status = Column(String, default="pending")
+    total_price = Column(Float)
 
     
 

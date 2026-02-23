@@ -1,36 +1,58 @@
 """(DB mein data dalne aur nikalne ke liye)"""
 from sqlalchemy.orm import Session
-from . import models, schemas 
+from . import models, schemas, utils 
 from fastapi import HTTPException
 
-def create_products (db:Session, product:schemas.productBase):
+# --- Products ---
+def create_products(db: Session, product: schemas.ProductCreate):
     db_product = models.Product(**product.model_dump())
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
     return db_product
 
-def read_products(db:Session):
+def read_products(db: Session):
     return db.query(models.Product).all()
 
-def create_user(db:Session, user:schemas.userCreat):
-    db_user = models.User(**user.model_dump())
+# --- Users ---
+def create_user(db: Session, user: schemas.UserCreate):
+    # Hash the password before saving
+    hashed_password = utils.get_password_hash(user.password)
+    db_user = models.User(
+        username=user.username,
+        email=user.email,
+        hashed_password=hashed_password
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
-def create_order( user_id: int,db:Session,order: schemas.orderCreate):
+def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email).first()
+
+# --- Orders ---
+def create_order(user_id: int, db: Session, order: schemas.OrderCreate):
+    # 0. User check
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     # 1. Database se product uthao taake asli price mil sake
     product = db.query(models.Product).filter(models.Product.id == order.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    
     if product.stock < order.quantity:
         raise HTTPException(status_code=400, detail="Out of stock")
+    
+    # Stock update
     product.stock -= order.quantity
-    # 2. Total price backend par calculate karo
+    
+    # 2. Total price calculation
     calculated_total = product.price * order.quantity
-      # 3. manual object banana
+    
+    # 3. Order creation
     db_order = models.Order(
         user_id=user_id,
         product_id=order.product_id,
@@ -44,11 +66,11 @@ def create_order( user_id: int,db:Session,order: schemas.orderCreate):
     db.refresh(db_order)
     return db_order
 
-def read_order(db:Session):
+def read_order(db: Session):
     return db.query(models.Order).all()
 
-def read_order_by_id(order_id:int,db:Session):
+def read_order_by_id(order_id: int, db: Session):
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
-    if  not db_order:
-      raise HTTPException(status_code=404, detail="Order not found")
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Order not found")
     return db_order
