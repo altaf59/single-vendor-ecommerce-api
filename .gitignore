@@ -9,3 +9,4 @@ mart.db
 .vscode/
 .idea/
 *.log
+.env
