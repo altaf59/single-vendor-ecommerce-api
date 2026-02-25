@@ -1,6 +1,6 @@
-"""(Pydantic validation ke liye)"""
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from datetime import datetime
 
 class ProductBase(BaseModel):
     name: str
@@ -22,6 +22,15 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
+class AdminCreate(UserCreate):
+    secret_code: str
+
+class UserLogin(BaseModel):
+
+    email: EmailStr
+    password: str
+
+
 class UserResponse(BaseModel):
     id: int
     username: str
@@ -41,7 +50,8 @@ class OrderResponse(BaseModel):
     product_id: int
     quantity: int
     status: str
-    total_price: int
+    total_price: float
+    created_at: datetime
 
     class Config:
         from_attributes = True

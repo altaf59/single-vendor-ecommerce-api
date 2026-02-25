@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Float, DateTime
+from sqlalchemy.orm import relationship
+from datetime import datetime
 from .database import Base
 
 class User(Base):
@@ -9,6 +11,8 @@ class User(Base):
     hashed_password = Column(String)
     is_admin = Column(Boolean, default=False)
 
+    orders = relationship("Order", back_populates="owner")
+
 class Product(Base):
     __tablename__ = "products"
     id = Column(Integer, primary_key=True, index=True)
@@ -16,6 +20,8 @@ class Product(Base):
     description = Column(String)
     price = Column(Float)
     stock = Column(Integer)
+
+    orders = relationship("Order", back_populates="item")
 
 class Order(Base):
     __tablename__ = "orders"
@@ -25,6 +31,11 @@ class Order(Base):
     quantity = Column(Integer)
     status = Column(String, default="pending")
     total_price = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    owner = relationship("User", back_populates="orders")
+    item = relationship("Product", back_populates="orders")
+
 
     
 

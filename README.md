@@ -1,70 +1,82 @@
-# Mart Ecommerce API 🛒
+# 🛒 Mart Ecommerce API (Single Vendor)
 
-A professional, secure, and clean Single-Vendor Ecommerce API built with **FastAPI** and **SQLAlchemy**.
+A professional, secure, and clean FastAPI-based Ecommerce API designed for a Single Vendor store.
 
 ## 🚀 Features
 
-- **User Management**: Secure user registration with **Bcrypt** password hashing.
-- **Product Management**: Create and list products with detailed attributes.
-- **Order System**: 
-  - Automated stock management (stock decreases on order).
-  - Backend-calculated total prices for security.
-  - Order status tracking (default: `pending`).
-- **Database**: SQLite integration with SQLAlchemy ORM.
-- **Validation**: Strict data validation using Pydantic schemas.
+- **Personalized Admin Dashboard**: Separate section for the Shop Owner.
+- **Secure Admin Registration**: Register using a secret code to prevent unauthorized access.
+- **Product Management**: Full CRUD (Create, Read, Update, Delete) functionality for products.
+- **Customer Shopping**: Customers can browse products, search by name, and place orders.
+- **Order Tracking**: Automated total price calculation and real-time stock management.
+- **Password Security**: Modern Bcrypt hashing for all users.
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
 - **Framework**: FastAPI
-- **Database**: SQLite (via SQLAlchemy)
-- **Security**: Passlib (Bcrypt) for hashing.
+- **Database**: SQLite (SQLAlchemy ORM)
+- **Security**: Bcrypt Hashing
 - **Validation**: Pydantic v2
 
 ## 📂 Project Structure
 
 ```text
-├── app/
-│   ├── routers/       # API Routes (Products, Orders, Users)
-│   ├── models.py      # Database Tables
-│   ├── schemas.py     # Pydantic Validation Models
-│   ├── crud.py        # Database Operations
-│   ├── database.py    # DB Connection Setup
-│   ├── utils.py       # Security & Helper Functions
-│   └── main.py        # Application Entry Point
-├── mart.db            # SQLite Database
-├── requirements.txt   # Dependencies
-└── README.md          # Project Documentation
+app/
+├── main.py          # Main Entry Point
+├── models.py        # Database Models
+├── schemas.py       # Pydantic Schemas
+├── crud.py          # Database Operations
+├── database.py      # DB Connection
+├── utils.py         # Security Helpers (Hasing)
+├── config.py        # Settings & Secret Keys
+└── routers/
+    ├── admin.py     # Admin/Vendor Endpoints
+    ├── products.py  # Public Product Catalog
+    ├── user.py      # Customer Accounts
+    └── orders.py    # Shopping & Orders
 ```
 
-## ⚙️ Installation & Setup
+## 🔐 Admin Configuration
 
-1. **Clone the repository**:
+To register as an admin, use the following details in the `/admin/register` endpoint:
+- **Secret Code**: `ALTAF_ADMIN_786` (Configurable in `app/config.py`)
+
+## 🚥 Main Endpoints
+
+### 👤 User / Customer
+- `POST /users/` - Register as a new customer.
+- `POST /users/login` - Login to your account.
+
+### 🍱 Products (Public)
+- `GET /products/` - View all products.
+- `GET /products/?search=name` - Search products by name.
+
+### 🛡️ Admin (Vendor)
+- `POST /admin/register` - Create an admin account (requires Secret Code).
+- `POST /admin/login` - Admin login.
+- `POST /admin/products` - Add new stock.
+- `PUT /admin/products/{id}` - Update product details.
+- `DELETE /admin/products/{id}` - Remove a product.
+- `GET /admin/orders` - View all customer orders.
+
+### 📦 Orders
+- `POST /orders/` - Place a new order (Autocalculates total & updates stock).
+- `GET /orders/{id}` - View specific order details.
+
+## 🏃 How to Run
+
+1. **Install Dependencies**:
    ```bash
-   git clone https://github.com/altaf59/single-vendor-ecommerce-api.git
-   cd single-vendor-ecommerce-api
+   pip install fastapi uvicorn sqlalchemy bcrypt
    ```
 
-2. **Create a virtual environment**:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Run the application**:
+2. **Run Server**:
    ```bash
    uvicorn app.main:app --reload
    ```
 
-5. **API Documentation**:
-   Once the server is running, visit:
-   - Swagger UI: `http://127.0.0.1:8000/docs`
-   - ReDoc: `http://127.0.0.1:8000/redoc`
+3. **Explore Documentation**:
+   Open `http://127.0.0.1:8000/docs` in your browser.
 
-## 📝 License
-
-This project is open-source. Feel free to use and modify it!
+---
+Built by **Altaf** with ❤️ using FastAPI.

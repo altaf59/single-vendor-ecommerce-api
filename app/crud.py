@@ -11,17 +11,39 @@ def create_products(db: Session, product: schemas.ProductCreate):
     db.refresh(db_product)
     return db_product
 
-def read_products(db: Session):
-    return db.query(models.Product).all()
+def read_products(db: Session, search: str = None):
+    query = db.query(models.Product)
+    if search:
+        query = query.filter(models.Product.name.contains(search))
+    return query.all()
 
+def delete_product(db: Session, product_id: int):
+    db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    db.delete(db_product)
+    db.commit()
+    return db_product
+def update_product(db: Session, product_id: int, product: schemas.ProductCreate):
+    db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    db_product.name = product.name
+    db_product.description = product.description
+    db_product.price = product.price
+    db_product.stock = product.stock
+    db.commit()
+    db.refresh(db_product)
+    return db_product
 # --- Users ---
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user(db: Session, user: schemas.UserCreate, is_admin: bool = False):
     # Hash the password before saving
     hashed_password = utils.get_password_hash(user.password)
     db_user = models.User(
         username=user.username,
         email=user.email,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        is_admin=is_admin
     )
     db.add(db_user)
     db.commit()
@@ -30,6 +52,9 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
+def get_user(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
 
 # --- Orders ---
 def create_order(user_id: int, db: Session, order: schemas.OrderCreate):
